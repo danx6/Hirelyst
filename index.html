@@ -440,9 +440,26 @@
       return state.theme === 'dark' ? icons.sun : icons.moon;
     }
 
-    function logoSVG() {
-      return `<svg class="logo-mark" viewBox="0 0 48 48" aria-label="Career Path Navigator logo" role="img"><path d="M10 34 24 10l14 24" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 34h10" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><circle cx="24" cy="24" r="3.2" fill="currentColor" stroke="none"/></svg>`;
-    }
+   function logoSVG() {
+  return `<svg class="logo-mark" viewBox="0 0 48 48" aria-label="Hirelyst logo" role="img">
+    <defs>
+      <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1"/>
+        <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:1"/>
+      </linearGradient>
+    </defs>
+    <!-- Left stroke: blue gradient -->
+    <rect x="12" y="8" width="6" height="32" rx="2" fill="url(#blueGrad)"/>
+    <!-- Right stroke: blue gradient -->
+    <rect x="30" y="8" width="6" height="32" rx="2" fill="url(#blueGrad)"/>
+    <!-- Crossbar: white, connecting both -->
+    <rect x="12" y="22" width="24" height="6" rx="2" fill="#ffffff"/>
+    <!-- Inner left accent: lighter blue -->
+    <rect x="14" y="10" width="2" height="28" rx="1" fill="#60a5fa" opacity="0.7"/>
+    <!-- Inner right accent: lighter blue -->
+    <rect x="32" y="10" width="2" height="28" rx="1" fill="#60a5fa" opacity="0.7"/>
+  </svg>`;
+}
 
     function showToast(title, copy) {
       const toast = document.createElement('div');
@@ -652,13 +669,13 @@
       return `
         <div class="landing">
           <section class="hero-panel">
-            <div class="logo" aria-label="Career Path Navigator brand">
+            <div class="logo" aria-label="Hirelyst brand">
               ${logoSVG()}
               <div class="brand-copy">Hirelyst</div>
             </div>
             <div class="hero-content fade-in">
-              <h1 class="hero-title">Launch smarter careers with a role-based hiring platform.</h1>
-              <p class="hero-copy">Hirelyst helps you to find the right opportunity without the noise. Build your profile, explore curated job listings, and apply with ease.</p>
+              <h1 class="hero-title">Your career path, made clearer.</h1>
+              <p class="hero-copy">Hirelyst helps candidates understand their next step, build a career-ready profile, and connect with opportunities that match their skills, goals, and direction.</p>
               <div style="display:flex;gap:var(--space-3);flex-wrap:wrap;">
               </div>
             </div>
