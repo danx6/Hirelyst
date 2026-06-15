@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hirelyst</title>
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css"
+</head>
+<body>
+  <a class="skip-link" href="#mainContent">Skip to content</a>
+  <div class="app-shell" id="app"></div>
+  <div class="toast-stack" id="toasts" aria-live="polite" aria-atomic="true"></div>
+
+  <script>
+    const icons = {
+      briefcase: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7V5.5A1.5 1.5 0 0 1 9.5 4h5A1.5 1.5 0 0 1 16 5.5V7"/><path d="M4 9.5h16a1 1 0 0 1 1 1v7A2.5 2.5 0 0 1 18.5 20h-13A2.5 2.5 0 0 1 3 17.5v-7a1 1 0 0 1 1-1Z"/><path d="M3 12h18"/></svg>',
+      user: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>',
+      dashboard: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h7V4H4zM13 20h7v-9h-7zM13 11h7V4h-7zM4 20h7v-5H4z"/></svg>',
+      search: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-3.5-3.5"/></svg>',
+      spark: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 9.8 9.1 4 12l5.8 2.9L12 21l2.2-6.1L20 12l-5.8-2.9Z"/></svg>',
+      resume: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/><path d="M10 13h6M10 17h6M10 9h2"/></svg>',
+      map: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18.5 9 20.5 3.5 18.5v-13L9 3.5l6 2 5.5-2v13z"/><path d="M9 3.5v17M15 5.5v13"/></svg>',
+      money: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M7 10h.01M17 14h.01"/></svg>',
+      plus: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
+      logout: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>',
+      moon: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.2 14.7A8.5 8.5 0 1 1 9.3 3.8a7 7 0 0 0 10.9 10.9Z"/></svg>',
+      sun: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M2 12h2.5M19.5 12H22M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>',
+      menu: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>',
+      education: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 8 9-4 9 4-9 4Z"/><path d="M7 10.5v4.3c0 .8 2.2 2.2 5 2.2s5-1.4 5-2.2v-4.3"/></svg>',
+      experience: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7V5.7A1.7 1.7 0 0 1 9.7 4h4.6A1.7 1.7 0 0 1 16 5.7V7"/><rect x="3" y="7" width="18" height="12" rx="2"/><path d="M3 12h18"/></svg>',
+      applicants: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 19a4 4 0 0 0-8 0"/><circle cx="12" cy="8" r="3"/><path d="M5 19a3 3 0 0 1 3-3"/><path d="M19 19a3 3 0 0 0-3-3"/></svg>',
+      arrowRight: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>'
+    };
+
+    const db = {
+      jobs: [
+        { id: 1, title: 'Frontend Developer', company: 'Talentbank Group', location: 'Kuala Lumpur', salary: 'RM 4,800 - RM 6,200', skills: ['React', 'JavaScript', 'CSS'], employerId: 'emp-1', postedDate: '2h ago' },
+        { id: 2, title: 'Junior Backend Engineer', company: 'CloudHarbor', location: 'Petaling Jaya', salary: 'RM 4,500 - RM 5,800', skills: ['Node.js', 'SQL', 'API'], employerId: 'emp-2', postedDate: '5h ago' },
+        { id: 3, title: 'UI/UX Designer', company: 'Northstar Digital', location: 'Remote', salary: 'RM 4,200 - RM 5,500', skills: ['Figma', 'UX Research', 'Design Systems'], employerId: 'emp-2', postedDate: '1d ago' },
+        { id: 4, title: 'Full Stack Intern', company: 'OrbitWorks', location: 'Subang Jaya', salary: 'RM 1,500 - RM 2,200', skills: ['JavaScript', 'React', 'Node.js'], employerId: 'emp-1', postedDate: '6h ago' },
+        { id: 5, title: 'Data Analyst', company: 'MetricFlow', location: 'Cyberjaya', salary: 'RM 4,900 - RM 6,400', skills: ['SQL', 'Excel', 'Python'], employerId: 'emp-3', postedDate: '3d ago' },
+        { id: 6, title: 'Web Developer', company: 'Skyline Commerce', location: 'Shah Alam', salary: 'RM 4,000 - RM 5,300', skills: ['HTML', 'CSS', 'JavaScript'], employerId: 'emp-3', postedDate: '8h ago' }
+      ],
+      candidates: [
+        { id: 'cand-1', name: 'Alicia Tan', role: 'Candidate', email: 'alicia@demo.com', password: 'demo123', skills: ['React', 'JavaScript', 'CSS', 'HTML'], education: 'Bachelor of Information Technology', experience: 'Built projects with responsive UIs.', appliedJobs: [1, 6], goal: 'Frontend Engineer', location: 'Petaling Jaya' },
+        { id: 'cand-2', name: 'Daniel Lim', role: 'Candidate', email: 'daniel@demo.com', password: 'demo123', skills: ['SQL', 'Python', 'Excel'], education: 'Bachelor of Computer Science', experience: 'Created dashboards and reporting pipelines for student clubs.', appliedJobs: [5], goal: 'Data Analyst', location: 'Kuala Lumpur' },
+        { id: 'cand-3', name: 'Nora Aziz', role: 'Candidate', email: 'nora@demo.com', password: 'demo123', skills: ['Node.js', 'API', 'SQL'], education: 'Software Engineering Bootcamp', experience: 'Built REST APIs and backend services for demo applications.', appliedJobs: [2], goal: 'Backend Engineer', location: 'Shah Alam' }
+      ],
+      employers: [
+        { id: 'emp-1', name: 'Talentbank', role: 'Employer', email: 'hiring@talentbank.com', password: 'demo123', company: 'Talentbank Group', postedJobs: [1, 4] },
+        { id: 'emp-2', name: 'Northstar Digital', role: 'Employer', email: 'talent@northstar.com', password: 'demo123', company: 'Northstar Digital', postedJobs: [2, 3] },
+        { id: 'emp-3', name: 'MetricFlow', role: 'Employer', email: 'careers@metricflow.com', password: 'demo123', company: 'MetricFlow', postedJobs: [5, 6] }
+      ]
+    };
+
+    const state = {
+      theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
+      authMode: 'login',
+      authRole: 'candidate',
+      currentUser: null,
+      currentView: 'dashboard',
+      jobSearch: '',
+      mobileSidebar: false,
+      applicantMap: {
+        1: ['cand-1'],
+        2: ['cand-3'],
+        5: ['cand-2'],
+        6: ['cand-1']
+      },
+      progressionMap: {
+        frontend: ['Intern', 'Junior Frontend', 'Frontend Developer', 'Senior Frontend'],
+        backend: ['Trainee', 'Backend Developer', 'Backend Engineer', 'Platform Engineer'],
+        data: ['Data Intern', 'Data Analyst', 'BI Analyst', 'Analytics Lead'],
+        general: ['Student', 'Associate', 'Specialist', 'Lead']
+      }
+    };
+
+    document.documentElement.setAttribute('data-theme', state.theme);
+
+    const app = document.getElementById('app');
+    const toasts = document.getElementById('toasts');
+
+    function getCurrentThemeIcon() {
+      return state.theme === 'dark' ? icons.sun : icons.moon;
+    }
+
+   function logoSVG() {
+  return `<svg class="logo-mark" viewBox="0 0 48 48" aria-label="Hirelyst logo" role="img">
+    <defs>
+      <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1"/>
+        <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:1"/>
+      </linearGradient>
+    </defs>
+    <!-- Left stroke: blue gradient -->
+    <rect x="12" y="8" width="6" height="32" rx="2" fill="url(#blueGrad)"/>
+    <!-- Right stroke: blue gradient -->
+    <rect x="30" y="8" width="6" height="32" rx="2" fill="url(#blueGrad)"/>
+    <!-- Crossbar: white, connecting both -->
+    <rect x="12" y="22" width="24" height="6" rx="2" fill="#ffffff"/>
+    <!-- Inner left accent: lighter blue -->
+    <rect x="14" y="10" width="2" height="28" rx="1" fill="#60a5fa" opacity="0.7"/>
+    <!-- Inner right accent: lighter blue -->
+    <rect x="32" y="10" width="2" height="28" rx="1" fill="#60a5fa" opacity="0.7"/>
+  </svg>`;
+}
+
+    function showToast(title, copy) {
+      const toast = document.createElement('div');
+      toast.className = 'toast fade-in';
+      toast.innerHTML = `<div class="toast-title">${title}</div><div class="toast-copy">${copy}</div>`;
+      toasts.appendChild(toast);
+      setTimeout(() => toast.remove(), 3200);
+    }
+
+    function initials(name = '') {
+      return name.split(' ').filter(Boolean).slice(0, 2).map(part => part[0]).join('').toUpperCase() || 'CP';
+    }
+
+    function currentRole() {
+      return state.currentUser?.role?.toLowerCase() || null;
+    }
+
+    function getAllUsers() {
+      return [...db.candidates, ...db.employers];
+    }
+
+    function findUser(email, password, role) {
+      const pool = role === 'candidate' ? db.candidates : db.employers;
+      return pool.find(user => user.email.toLowerCase() === email.toLowerCase() && user.password === password);
+    }
+
+    function calculateMatch(job, candidate) {
+      const jobSkills = job.skills.map(s => s.toLowerCase());
+      const userSkills = candidate.skills.map(s => s.toLowerCase());
+      const overlap = jobSkills.filter(skill => userSkills.includes(skill)).length;
+      const base = Math.round((overlap / Math.max(jobSkills.length, 1)) * 100);
+      const adjusted = Math.min(98, Math.max(52, base + (candidate.skills.length > 3 ? 10 : 4)));
+      return adjusted;
+    }
+
+    function suggestedTrack(candidate) {
+      const skills = candidate.skills.join(' ').toLowerCase();
+      if (skills.includes('react') || skills.includes('css') || skills.includes('html')) return state.progressionMap.frontend;
+      if (skills.includes('node') || skills.includes('api')) return state.progressionMap.backend;
+      if (skills.includes('sql') || skills.includes('python') || skills.includes('excel')) return state.progressionMap.data;
+      return state.progressionMap.general;
+    }
+
+    function getRecommendedJobs(candidate) {
+      return db.jobs
+        .map(job => ({ ...job, match: calculateMatch(job, candidate) }))
+        .sort((a, b) => b.match - a.match)
+        .slice(0, 4);
+    }
+
+    function getVisibleJobs() {
+      const term = state.jobSearch.trim().toLowerCase();
+      const base = db.jobs.map(job => ({ ...job, match: currentRole() === 'candidate' ? calculateMatch(job, state.currentUser) : null }));
+      if (!term) return base;
+      return base.filter(job => {
+        const haystack = [job.title, job.company, job.location, ...job.skills].join(' ').toLowerCase();
+        return haystack.includes(term);
+      });
+    }
+
+    function applyToJob(jobId) {
+      if (currentRole() !== 'candidate') return;
+      const candidate = state.currentUser;
+      if (!candidate.appliedJobs.includes(jobId)) {
+        candidate.appliedJobs.unshift(jobId);
+        if (!state.applicantMap[jobId]) state.applicantMap[jobId] = [];
+        state.applicantMap[jobId].unshift(candidate.id);
+        showToast('Application submitted', 'The employer dashboard now shows your application instantly.');
+        render();
+      } else {
+        showToast('Already applied', 'This job is already in your applied list.');
+      }
+    }
+
+    function addJob(formData) {
+      const nextId = Math.max(...db.jobs.map(job => job.id)) + 1;
+      const skills = formData.skills.split(',').map(item => item.trim()).filter(Boolean);
+      const newJob = {
+        id: nextId,
+        title: formData.title,
+        company: state.currentUser.company,
+        location: formData.location,
+        salary: formData.salary,
+        skills,
+        employerId: state.currentUser.id,
+        postedDate: 'Just now'
+      };
+      db.jobs.unshift(newJob);
+      state.currentUser.postedJobs.unshift(nextId);
+      state.applicantMap[nextId] = [];
+      showToast('Job posted', 'Your new listing is live in the marketplace.');
+      state.currentView = 'employer-jobs';
+      render();
+    }
+
+    function updateCandidateProfile(formData) {
+      const candidate = state.currentUser;
+      candidate.name = formData.name;
+      candidate.goal = formData.goal;
+      candidate.location = formData.location;
+      candidate.skills = formData.skills.split(',').map(item => item.trim()).filter(Boolean);
+      candidate.education = formData.education;
+      candidate.experience = formData.experience;
+      showToast('Profile updated', 'Resume builder changes are reflected across the dashboard.');
+      render();
+    }
+
+    function toggleTheme() {
+      state.theme = state.theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', state.theme);
+      render();
+    }
+
+    function loginAsDemo(role) {
+      state.currentUser = role === 'candidate' ? db.candidates[0] : db.employers[0];
+      state.currentView = role === 'candidate' ? 'dashboard' : 'employer-dashboard';
+      render();
+    }
+
+    function handleAuthSubmit(event) {
+      event.preventDefault();
+      const fd = new FormData(event.target);
+      const role = fd.get('role');
+      const email = fd.get('email');
+      const password = fd.get('password');
+
+      if (state.authMode === 'login') {
+        const user = findUser(email, password, role);
+        if (!user) {
+          showToast('Login failed', 'Use the demo credentials or sign up a new account.');
+          return;
+        }
+        state.currentUser = user;
+        state.currentView = role === 'candidate' ? 'dashboard' : 'employer-dashboard';
+        showToast('Welcome back', `Signed in as ${user.name}.`);
+        render();
+        return;
+      }
+
+      const name = fd.get('name');
+      const exists = getAllUsers().some(user => user.email.toLowerCase() === email.toLowerCase());
+      if (exists) {
+        showToast('Email already used', 'Choose another email for this mock sign up.');
+        return;
+      }
+
+      if (role === 'candidate') {
+        const candidate = {
+          id: `cand-${Date.now()}`,
+          name,
+          role: 'Candidate',
+          email,
+          password,
+          skills: ['HTML', 'CSS'],
+          education: 'Add your education details',
+          experience: 'Add your project or internship experience',
+          appliedJobs: [],
+          goal: 'Aspiring Developer',
+          location: 'Malaysia'
+        };
+        db.candidates.unshift(candidate);
+        state.currentUser = candidate;
+        state.currentView = 'dashboard';
+      } else {
+        const employer = {
+          id: `emp-${Date.now()}`,
+          name,
+          role: 'Employer',
+          email,
+          password,
+          company: fd.get('company') || name,
+          postedJobs: []
+        };
+        db.employers.unshift(employer);
+        state.currentUser = employer;
+        state.currentView = 'employer-dashboard';
+      }
+      showToast('Account created', 'Your role-based dashboard is ready.');
+      render();
+    }
+
+    function logout() {
+      state.currentUser = null;
+      state.currentView = 'dashboard';
+      state.mobileSidebar = false;
+      render();
+    }
+
+    function roleNavItems() {
+      if (currentRole() === 'candidate') {
+        return [
+          ['dashboard', 'Dashboard', icons.dashboard],
+          ['jobs', 'Job listings', icons.briefcase],
+          ['profile', 'Profile', icons.user],
+          ['resume', 'Resume builder', icons.resume]
+        ];
+      }
+      return [
+        ['employer-dashboard', 'Dashboard', icons.dashboard],
+        ['post-job', 'Post job', icons.plus],
+        ['employer-jobs', 'Posted jobs', icons.briefcase],
+        ['applicants', 'Applicants', icons.applicants]
+      ];
+    }
+
+    function landingView() {
+      return `
+        <div class="landing">
+          <section class="hero-panel">
+            <div class="logo" aria-label="Hirelyst brand">
+              ${logoSVG()}
+              <div class="brand-copy">Hirelyst</div>
+            </div>
+            <div class="hero-content fade-in">
+              <h1 class="hero-title">Your career path, made clearer.</h1>
+              <p class="hero-copy">Hirelyst helps candidates understand their next step, build a career-ready profile, and connect with opportunities that match their skills, goals, and direction.</p>
+              <div style="display:flex;gap:var(--space-3);flex-wrap:wrap;">
+              </div>
+            </div>
+            <div class="hero-stats">
+              <div class="stat-card">
+                <div class="stat-value">397</div>
+                <div class="stat-label">Employers hiring now</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value">95%</div>
+                <div class="stat-label">Peak skill match badge</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value">4-step</div>
+                <div class="stat-label">Career path suggestion flow</div>
+              </div>
+            </div>
+          </section>
+          <section class="auth-panel">
+            <div class="auth-card fade-in">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:var(--space-3);margin-bottom:var(--space-4);">
+                <div class="helper">Use demo accounts or create your own mock profile.</div>
+                <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">${getCurrentThemeIcon()}</button>
+              </div>
+              <div class="tabs" role="tablist" aria-label="Authentication mode">
+                <button class="tab-btn ${state.authMode === 'login' ? 'active' : ''}" onclick="setAuthMode('login')" role="tab" aria-selected="${state.authMode === 'login'}">Login</button>
+                <button class="tab-btn ${state.authMode === 'signup' ? 'active' : ''}" onclick="setAuthMode('signup')" role="tab" aria-selected="${state.authMode === 'signup'}">Sign up</button>
+              </div>
+              <div class="auth-header">
+                <h2 class="auth-title">${state.authMode === 'login' ? 'Welcome back' : 'Create your account'}</h2>
+                <p class="auth-subtitle">Select a role to access the right dashboard and workflow.</p>
+              </div>
+              <form class="form-grid" onsubmit="handleAuthSubmit(event)">
+                <input type="hidden" name="role" value="${state.authRole}">
+                <div class="field">
+                  <span class="label">Choose role</span>
+                  <div class="role-picker">
+                    <button type="button" class="role-option ${state.authRole === 'candidate' ? 'active' : ''}" onclick="setAuthRole('candidate')">
+                      ${icons.user}
+                      <strong>Candidate</strong>
+                      <span class="helper">Build your resume, search jobs, and track applications.</span>
+                    </button>
+                    <button type="button" class="role-option ${state.authRole === 'employer' ? 'active' : ''}" onclick="setAuthRole('employer')">
+                      ${icons.briefcase}
+                      <strong>Employer</strong>
+                      <span class="helper">Post roles, manage listings, and review applicants.</span>
+                    </button>
+                  </div>
+                </div>
+                ${state.authMode === 'signup' ? `<div class="field"><label class="label" for="signupName">Full name</label><input id="signupName" class="input" name="name" placeholder="Enter your full name" required></div>` : ''}
+                ${state.authMode === 'signup' && state.authRole === 'employer' ? `<div class="field"><label class="label" for="company">Company name</label><input id="company" class="input" name="company" placeholder="Enter company name" required></div>` : ''}
+                <div class="field"><label class="label" for="email">Email address</label><input id="email" class="input" type="email" name="email" placeholder="you@example.com" value="${state.authMode === 'login' ? (state.authRole === 'candidate' ? 'alicia@demo.com' : 'hiring@talentbank.com') : ''}" required></div>
+                <div class="field"><label class="label" for="password">Password</label><input id="password" class="input" type="password" name="password" placeholder="Enter password" value="${state.authMode === 'login' ? 'demo123' : ''}" required></div>
+                <button class="btn btn-primary btn-block" type="submit">${state.authMode === 'login' ? 'Login and continue' : 'Create account'}</button>
+              </form>
+            </div>
+          </section>
+        </div>`;
+    }
+
+    function candidateDashboard() {
+      const candidate = state.currentUser;
+      const appliedJobs = db.jobs.filter(job => candidate.appliedJobs.includes(job.id));
+      const recommended = getRecommendedJobs(candidate);
+      const track = suggestedTrack(candidate);
+      return `
+        <section class="view ${state.currentView === 'dashboard' ? 'active' : ''}" id="view-dashboard">
+          <div class="section-stack">
+            <div class="page-hero">
+              <div>
+                <h1 class="page-title">Candidate dashboard</h1>
+                <p class="page-copy">Track your applications, discover skill-matched roles, and keep your profile market-ready.</p>
+              </div>
+              <div class="badge badge-primary">Goal: ${candidate.goal || 'Career growth'}</div>
+            </div>
+            <div class="grid-3">
+              <div class="card">
+                <div class="metric-number">${candidate.appliedJobs.length}</div>
+                <div class="muted">Applied jobs</div>
+              </div>
+              <div class="card">
+                <div class="metric-number">${recommended[0]?.match || 0}%</div>
+                <div class="muted">Top job match</div>
+              </div>
+              <div class="card">
+                <div class="metric-number">${candidate.skills.length}</div>
+                <div class="muted">Skills on profile</div>
+              </div>
+            </div>
+            <div class="grid-2">
+              <div class="card">
+                <div class="card-header"><h2 class="card-title">Recommended jobs</h2><span class="badge badge-success">Live matching</span></div>
+                <div class="list-grid">
+                  ${recommended.map(job => jobRow(job, true)).join('')}
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-header"><h2 class="card-title">Profile summary</h2><button class="btn btn-ghost" onclick="navigate('resume')">${icons.resume}<span>Edit resume</span></button></div>
+                <div class="mini-list">
+                  <div class="mini-item"><span>${icons.user}<span>${candidate.name}</span></span><span class="muted">${candidate.location || 'Malaysia'}</span></div>
+                  <div class="mini-item"><span>${icons.education}<span>${candidate.education}</span></span></div>
+                  <div class="mini-item"><span>${icons.spark}<span>${candidate.skills.slice(0, 4).join(', ')}</span></span></div>
+                </div>
+                <div class="divider"></div>
+                <div class="preview-block">
+                  <h3>Career Path Navigator</h3>
+                  <div class="career-path">
+                    ${track.map((step, index) => `<span class="path-node">${step}</span>${index < track.length - 1 ? `<span class="path-arrow">${icons.arrowRight}</span>` : ''}`).join('')}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><h2 class="card-title">Applied jobs</h2><button class="btn btn-secondary" onclick="navigate('jobs')">Browse more jobs</button></div>
+              ${appliedJobs.length ? `<div class="table-wrap"><table><thead><tr><th>Role</th><th>Company</th><th>Location</th><th>Status</th></tr></thead><tbody>${appliedJobs.map(job => `<tr><td>${job.title}</td><td>${job.company}</td><td>${job.location}</td><td><span class="badge badge-warning">Under review</span></td></tr>`).join('')}</tbody></table></div>` : emptyState('No applications yet', 'Start with the job listings page and apply to your first role.')}
+            </div>
+          </div>
+        </section>`;
+    }
+
+    function candidateProfile() {
+      const candidate = state.currentUser;
+      return `
+        <section class="view ${state.currentView === 'profile' ? 'active' : ''}" id="view-profile">
+          <div class="section-stack">
+            <div class="page-hero">
+              <div>
+                <h1 class="page-title">Candidate profile</h1>
+                <p class="page-copy">This summary updates from the resume builder and powers the mock matching engine.</p>
+              </div>
+              <span class="badge badge-success">${candidate.skills.length} skills indexed</span>
+            </div>
+            <div class="grid-2">
+              <div class="card">
+                <div class="card-header"><h2 class="card-title">About</h2></div>
+                <div class="mini-list">
+                  <div class="mini-item"><span>${icons.user}<span>${candidate.name}</span></span><span class="muted">${candidate.goal}</span></div>
+                  <div class="mini-item"><span>${icons.map}<span>${candidate.location}</span></span></div>
+                  <div class="mini-item"><span>${icons.education}<span>${candidate.education}</span></span></div>
+                </div>
+                <div class="divider"></div>
+                <p class="muted">${candidate.experience}</p>
+              </div>
+              <div class="card">
+                <div class="card-header"><h2 class="card-title">Skills</h2><button class="btn btn-ghost" onclick="navigate('resume')">Update profile</button></div>
+                <div class="skills">${candidate.skills.map(skill => `<span class="tag">${skill}</span>`).join('')}</div>
+              </div>
+            </div>
+          </div>
+        </section>`;
+    }
+
+    function candidateJobs() {
+      const jobs = getVisibleJobs();
+      return `
+        <section class="view ${state.currentView === 'jobs' ? 'active' : ''}" id="view-jobs">
+          <div class="section-stack">
+            <div class="page-hero">
+              <div>
+                <h1 class="page-title">Job listings</h1>
+                <p class="page-copy">Search by job title, company, or skill, then apply directly into the mock application state.</p>
+              </div>
+              <div class="search-inline" style="min-width:min(100%, 28rem);">
+                ${icons.search}
+                <input type="search" placeholder="Search title, company, or skill" value="${state.jobSearch}" oninput="setSearch(this.value)">
+              </div>
+            </div>
+            <div class="job-grid">
+              ${jobs.length ? jobs.map(job => jobCard(job)).join('') : emptyState('No jobs found', 'Try another title, company name, or skill keyword.')}
+            </div>
+          </div>
+        </section>`;
+    }
+
+    function candidateResume() {
+      const candidate = state.currentUser;
+      return `
+        <section class="view ${state.currentView === 'resume' ? 'active' : ''}" id="view-resume">
+          <div class="section-stack">
+            <div class="page-hero">
+              <div>
+                <h1 class="page-title">Resume builder</h1>
+                <p class="page-copy">Edit your details and watch the candidate profile preview update instantly for demo-ready state management.</p>
+              </div>
+            </div>
+            <div class="resume-layout">
+              <div class="card">
+                <form class="form-grid" onsubmit="saveResume(event)">
+                  <div class="field-row">
+                    <div class="field"><label class="label" for="resName">Full name</label><input class="input" id="resName" name="name" value="${candidate.name}" required></div>
+                    <div class="field"><label class="label" for="resGoal">Career goal</label><input class="input" id="resGoal" name="goal" value="${candidate.goal || ''}" required></div>
+                  </div>
+                  <div class="field"><label class="label" for="resLocation">Location</label><input class="input" id="resLocation" name="location" value="${candidate.location || ''}" required></div>
+                  <div class="field"><label class="label" for="resSkills">Skills</label><input class="input" id="resSkills" name="skills" value="${candidate.skills.join(', ')}" placeholder="React, JavaScript, CSS" required></div>
+                  <div class="field"><label class="label" for="resEducation">Education</label><input class="input" id="resEducation" name="education" value="${candidate.education}" required></div>
+                  <div class="field"><label class="label" for="resExperience">Experience</label><textarea class="textarea" id="resExperience" name="experience" required>${candidate.experience}</textarea></div>
+                  <button class="btn btn-primary" type="submit">Save resume</button>
+                </form>
+              </div>
+              <div class="profile-preview">
+                <div class="preview-sheet">
+                  <div class="preview-header">
+                    <div class="badge badge-primary">Live preview</div>
+                    <h2 class="preview-name">${candidate.name}</h2>
+                    <p class="muted">${candidate.goal} · ${candidate.location}</p>
+                  </div>
+                  <div class="preview-block">
+                    <h3>Skills</h3>
+                    <div class="skills">${candidate.skills.map(skill => `<span class="tag">${skill}</span>`).join('')}</div>
+                  </div>
+                  <div class="preview-block">
+                    <h3>Education</h3>
+                    <p>${candidate.education}</p>
+                  </div>
+                  <div class="preview-block">
+                    <h3>Experience</h3>
+                    <p class="muted">${candidate.experience}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>`;
+    }
+
+    function employerDashboard() {
+      const employerJobs = db.jobs.filter(job => job.employerId === state.currentUser.id);
+      const totalApplicants = employerJobs.reduce((sum, job) => sum + (state.applicantMap[job.id]?.length || 0), 0);
+      return `
+        <section class="view ${state.currentView === 'employer-dashboard' ? 'active' : ''}" id="view-employer-dashboard">
+          <div class="section-stack">
+            <div class="page-hero">
+              <div>
+                <h1 class="page-title">Employer dashboard</h1>
+                <p class="page-copy">Monitor active job posts, candidate volume, and recruitment momentum across your mock pipeline.</p>
+              </div>
+              <button class="btn btn-primary" onclick="navigate('post-job')">${icons.plus}<span>Post a job</span></button>
+            </div>
+            <div class="grid-3">
+              <div class="card"><div class="metric-number">${employerJobs.length}</div><div class="muted">Active job posts</div></div>
+              <div class="card"><div class="metric-number">${totalApplicants}</div><div class="muted">Applicants received</div></div>
+              <div class="card"><div class="metric-number">${employerJobs.length ? Math.max(...employerJobs.map(job => state.applicantMap[job.id]?.length || 0)) : 0}</div><div class="muted">Best performing listing</div></div>
+            </div>
+            <div class="grid-2">
+              <div class="card">
+                <div class="card-header"><h2 class="card-title">Recent postings</h2><button class="btn btn-ghost" onclick="navigate('employer-jobs')">Manage jobs</button></div>
+                <div class="mini-list">${employerJobs.slice(0, 4).map(job => `<div class="mini-item"><span><strong>${job.title}</strong><br><span class="muted">${job.location}</span></span><span class="badge badge-primary">${state.applicantMap[job.id]?.length || 0} applicants</span></div>`).join('') || '<p class="muted">No jobs posted yet.</p>'}</div>
+              </div>
+              <div class="card">
+                <div class="card-header"><h2 class="card-title">Hiring focus</h2><span class="badge badge-success">Pipeline health</span></div>
+                <p class="muted">Use the post job form to simulate new listings, then review applicants immediately from the connected employer workflow.</p>
+                <div class="divider"></div>
+                <div class="career-path">
+                  <span class="path-node">Create listing</span>
+                  <span class="path-arrow">${icons.arrowRight}</span>
+                  <span class="path-node">Review applicants</span>
+                  <span class="path-arrow">${icons.arrowRight}</span>
+                  <span class="path-node">Shortlist match</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>`;
+    }
+
+    function postJobView() {
+      return `
+        <section class="view ${state.currentView === 'post-job' ? 'active' : ''}" id="view-post-job">
+          <div class="section-stack">
+            <div class="page-hero">
+              <div>
+                <h1 class="page-title">Post a job</h1>
+                <p class="page-copy">Create a new opening and publish it directly to the shared job marketplace.</p>
+              </div>
+            </div>
+            <div class="card" style="max-width:52rem;">
+              <form class="form-grid" onsubmit="submitJob(event)">
+                <div class="field-row">
+                  <div class="field"><label class="label" for="jobTitle">Job title</label><input class="input" id="jobTitle" name="title" placeholder="Frontend Developer" required></div>
+                  <div class="field"><label class="label" for="jobLocation">Location</label><input class="input" id="jobLocation" name="location" placeholder="Petaling Jaya" required></div>
+                </div>
+                <div class="field"><label class="label" for="jobSalary">Salary range</label><input class="input" id="jobSalary" name="salary" placeholder="RM 4,500 - RM 6,000" required></div>
+                <div class="field"><label class="label" for="jobSkills">Required skills</label><input class="input" id="jobSkills" name="skills" placeholder="React, JavaScript, CSS" required></div>
+                <button class="btn btn-primary" type="submit">Publish listing</button>
+              </form>
+            </div>
+          </div>
+        </section>`;
+    }
+
+    function employerJobsView() {
+      const jobs = db.jobs.filter(job => job.employerId === state.currentUser.id);
+      return `
+        <section class="view ${state.currentView === 'employer-jobs' ? 'active' : ''}" id="view-employer-jobs">
+          <div class="section-stack">
+            <div class="page-hero">
+              <div>
+                <h1 class="page-title">Posted jobs</h1>
+                <p class="page-copy">Review every listing you have published and inspect demand using the applicant counts.</p>
+              </div>
+            </div>
+            <div class="job-grid">
+              ${jobs.length ? jobs.map(job => `
+                <article class="job-card">
+                  <div class="job-top">
+                    <div>
+                      <h2 class="card-title">${job.title}</h2>
+                      <div class="company-line">${icons.map}<span>${job.location}</span></div>
+                    </div>
+                    <span class="badge badge-primary">${state.applicantMap[job.id]?.length || 0} applicants</span>
+                  </div>
+                  <div class="job-meta">
+                    <span class="tag">${job.salary}</span>
+                    ${job.skills.map(skill => `<span class="tag">${skill}</span>`).join('')}
+                  </div>
+                </article>`).join('') : emptyState('No posted jobs yet', 'Create your first listing to begin collecting applicants.')}
+            </div>
+          </div>
+        </section>`;
+    }
+
+    function applicantsView() {
+      const employerJobs = db.jobs.filter(job => job.employerId === state.currentUser.id);
+      const rows = employerJobs.flatMap(job => (state.applicantMap[job.id] || []).map(candidateId => {
+        const candidate = db.candidates.find(item => item.id === candidateId);
+        return { job, candidate, match: calculateMatch(job, candidate) };
+      }));
+
+      return `
+        <section class="view ${state.currentView === 'applicants' ? 'active' : ''}" id="view-applicants">
+          <div class="section-stack">
+            <div class="page-hero">
+              <div>
+                <h1 class="page-title">Applicants</h1>
+                <p class="page-copy">Mock candidates appear here as soon as they apply, allowing a full demo of employer review flow.</p>
+              </div>
+            </div>
+            <div class="card">
+              ${rows.length ? `<div class="table-wrap"><table><thead><tr><th>Candidate</th><th>Applied role</th><th>Skills</th><th>Match</th></tr></thead><tbody>${rows.map(({ job, candidate, match }) => `<tr><td><strong>${candidate.name}</strong><br><span class="muted">${candidate.education}</span></td><td>${job.title}</td><td>${candidate.skills.slice(0, 3).join(', ')}</td><td><span class="badge badge-success">${match}% Match</span></td></tr>`).join('')}</tbody></table></div>` : emptyState('No applicants yet', 'Candidate applications will appear here automatically.')}
+            </div>
+          </div>
+        </section>`;
+    }
+
+    function jobRow(job, includeMatch = false) {
+      return `<div class="mini-item"><span><strong>${job.title}</strong><br><span class="muted">${job.company}</span></span>${includeMatch ? `<span class="badge badge-success">${job.match}% Match</span>` : ''}</div>`;
+    }
+
+    function jobCard(job) {
+      const applied = state.currentUser.appliedJobs.includes(job.id);
+      return `
+        <article class="job-card">
+          <div class="job-top">
+            <div>
+              <h2 class="card-title">${job.title}</h2>
+              <div class="company-line">${icons.briefcase}<span>${job.company}</span></div>
+            </div>
+            <span class="badge badge-primary">${job.match}% Match</span>
+          </div>
+          <div class="job-meta">
+            <span class="tag">${icons.map}<span>${job.location}</span></span>
+            <span class="tag">${icons.money}<span>${job.salary}</span></span>
+            <span class="tag">${job.postedDate}</span>
+          </div>
+          <div class="skills">${job.skills.map(skill => `<span class="tag">${skill}</span>`).join('')}</div>
+          <div class="match-row">
+            <div class="progress"><span style="width:${job.match}%"></span></div>
+            <strong>${job.match}%</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:var(--space-3);flex-wrap:wrap;">
+            <span class="muted">Rule-based match from your listed skills.</span>
+            <button class="btn ${applied ? 'btn-secondary' : 'btn-primary'}" onclick="applyToJob(${job.id})" ${applied ? 'disabled' : ''}>${applied ? 'Applied' : 'Apply now'}</button>
+          </div>
+        </article>`;
+    }
+
+    function emptyState(title, copy) {
+      return `<div class="empty-state">${icons.spark}<strong>${title}</strong><p class="muted">${copy}</p></div>`;
+    }
+
+    function appLayout() {
+      const user = state.currentUser;
+      const navItems = roleNavItems();
+      return `
+        <div class="overlay ${state.mobileSidebar ? 'show' : ''}" onclick="toggleSidebar(false)"></div>
+        <div class="app-layout">
+          <aside class="sidebar ${state.mobileSidebar ? 'open' : ''}" aria-label="Sidebar navigation">
+            <div class="logo">
+              ${logoSVG()}
+              <div class="brand-copy">Hirelyst</div>
+            </div>
+            <div class="user-pill" style="justify-content:flex-start;">
+              <div class="avatar">${initials(user.name)}</div>
+              <div class="user-text">
+                <strong>${user.name}</strong>
+                <div class="faint">${user.role}</div>
+              </div>
+            </div>
+            <div class="nav-group">
+              <div class="nav-label">Workspace</div>
+              ${navItems.map(([key, label, icon]) => `<button class="nav-link ${state.currentView === key ? 'active' : ''}" onclick="navigate('${key}')">${icon}<span>${label}</span></button>`).join('')}
+            </div>
+            <div class="sidebar-footer">
+              <button class="btn btn-secondary" onclick="toggleTheme()">${getCurrentThemeIcon()}<span>Theme</span></button>
+              <button class="btn btn-secondary" onclick="logout()">${icons.logout}<span>Log out</span></button>
+            </div>
+          </aside>
+          <div class="main-wrap">
+            <header class="topbar">
+              <div class="topbar-left">
+                <button class="icon-btn mobile-toggle" onclick="toggleSidebar(true)" aria-label="Open navigation">${icons.menu}</button>
+                <div>
+                  <strong>${currentRole() === 'candidate' ? 'Career center' : 'Employer center'}</strong>
+                  <div class="faint"></div>
+                </div>
+              </div>
+              <div class="topbar-right">
+                <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">${getCurrentThemeIcon()}</button>
+                <div class="user-pill">
+                  <div class="avatar">${initials(user.name)}</div>
+                  <div>
+                    <strong>${user.name}</strong>
+                    <div class="faint">${currentRole() === 'candidate' ? 'Candidate' : user.company}</div>
+                  </div>
+                </div>
+              </div>
+            </header>
+            <main class="main-content" id="mainContent">
+              ${currentRole() === 'candidate' ? [candidateDashboard(), candidateJobs(), candidateProfile(), candidateResume()].join('') : [employerDashboard(), postJobView(), employerJobsView(), applicantsView()].join('')}
+            </main>
+          </div>
+        </div>`;
+    }
+
+    function render() {
+      app.innerHTML = state.currentUser ? appLayout() : landingView();
+      bindThemeToggle();
+    }
+
+    function bindThemeToggle() {
+      document.querySelectorAll('[data-theme-toggle]').forEach(button => {
+        button.onclick = toggleTheme;
+      });
+    }
+
+    function navigate(view) {
+      state.currentView = view;
+      state.mobileSidebar = false;
+      render();
+    }
+
+    function setAuthMode(mode) {
+      state.authMode = mode;
+      render();
+    }
+
+    function setAuthRole(role) {
+      state.authRole = role;
+      render();
+    }
+
+    function setSearch(value) {
+      state.jobSearch = value;
+      if (state.currentView !== 'jobs') state.currentView = 'jobs';
+      render();
+    }
+
+    function saveResume(event) {
+      event.preventDefault();
+      const fd = Object.fromEntries(new FormData(event.target).entries());
+      updateCandidateProfile(fd);
+    }
+
+    function submitJob(event) {
+      event.preventDefault();
+      const fd = Object.fromEntries(new FormData(event.target).entries());
+      addJob(fd);
+    }
+
+    function toggleSidebar(force) {
+      state.mobileSidebar = typeof force === 'boolean' ? force : !state.mobileSidebar;
+      render();
+    }
+
+    window.loginAsDemo = loginAsDemo;
+    window.handleAuthSubmit = handleAuthSubmit;
+    window.setAuthMode = setAuthMode;
+    window.setAuthRole = setAuthRole;
+    window.navigate = navigate;
+    window.applyToJob = applyToJob;
+    window.setSearch = setSearch;
+    window.saveResume = saveResume;
+    window.submitJob = submitJob;
+    window.toggleTheme = toggleTheme;
+    window.logout = logout;
+    window.toggleSidebar = toggleSidebar;
+
+    render();
+  </script>
+</body>
+</html>
